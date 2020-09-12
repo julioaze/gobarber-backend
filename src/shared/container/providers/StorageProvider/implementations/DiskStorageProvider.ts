@@ -1,14 +1,14 @@
 import fs from 'fs';
 import path from 'path';
 import uploadConfig from '@config/upload';
+import AppError from '@shared/errors/AppError';
 import IStorageProvider from '../models/IStorageProvider';
 
 class DiskStorageProvider implements IStorageProvider {
   public async saveFile(file: string): Promise<string> {
-    // move o arquivo
     await fs.promises.rename(
       path.resolve(uploadConfig.tmpFolder, file),
-      path.resolve(uploadConfig.uploadsFolder, 'uploads', file),
+      path.resolve(uploadConfig.uploadsFolder, file),
     );
 
     return file;
@@ -21,8 +21,8 @@ class DiskStorageProvider implements IStorageProvider {
     // pegamo no catch
     try {
       await fs.promises.stat(filePath);
-    } catch {
-      return;
+    } catch (err) {
+      throw new AppError(err);
     }
 
     await fs.promises.unlink(filePath);
